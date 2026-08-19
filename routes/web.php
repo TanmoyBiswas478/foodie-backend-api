@@ -1,28 +1,17 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\File;
 
-// 1. Agar koi seedha main URL khole toh 'home/index.html' dikhaye
-Route::get('/', function () {
-    $path = public_path('home/index.html');
-    if (File::exists($path)) {
-        return File::get($path);
-    }
-    return view('welcome');
-});
+Route::get('/{any?}', function ($any = null) {
+    // Agar koi path nahi diya toh default 'home' folder lenge
+    $path = empty($any) ? 'home/index.html' : trim($any, '/') . '/index.html';
+    
+    $fullPath = public_path($path);
 
-// 2. Agar koi sub-page khole (jaise /login, /dashboard, /admin) toh us naam ka folder dhoondh kar uska index.html khol de
-Route::get('/{any?}', function ($any) {
-    // Agar path ke aage slash ho toh use hata dein
-    $any = trim($any, '/');
-    
-    // Check karo kya us naam ka folder public folder mein hai aur uske andar index.html hai?
-    $path = public_path($any . '/index.html');
-    
-    if (File::exists($path)) {
-        return File::get($path);
+    if (File::exists($fullPath)) {
+        return File::get($fullPath);
     }
     
-    // Agar koi aesa route na mile, toh wapas home page par bhej do
+    // Fallback agar specific file na mile toh home page dikhayega
     $fallback = public_path('home/index.html');
     if (File::exists($fallback)) {
         return File::get($fallback);
