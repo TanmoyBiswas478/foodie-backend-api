@@ -16,8 +16,9 @@ COPY . /var/www/html
 # Set working directory
 WORKDIR /var/www/html
 
-# Run composer install to generate vendor folder
-RUN composer install --no-dev --optimize-autoloader
+# Run composer install with timeout increase and retry options
+RUN composer config -g process-timeout 2000 \
+    && composer install --no-dev --optimize-autoloader --no-interaction
 
 # Set permissions for Laravel storage and cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
