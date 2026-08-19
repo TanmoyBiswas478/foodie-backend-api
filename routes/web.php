@@ -1,21 +1,17 @@
 use Illuminate\Support\Facades\Route;
 
-Route::get('/{any?}', function ($any = null) {
-    // Agar koi path nahi diya toh 'home' man lo
-    $folder = empty($any) ? 'home' : trim($any, '/');
+Route::get('/{any?}', function () {
+    // Check karo ki main index.html kahan rakhi hai
+    $path = public_path('index.html');
     
-    // Alag-alag paths check karte hain
-    $path1 = public_path($folder . '/index.html');
-    $path2 = public_path('browser/' . $folder . '/index.html'); // Agar angular 'browser' folder mein build hua ho
-
-    if (file_exists($path1)) {
-        return response()->file($path1);
+    if (!file_exists($path)) {
+        // Agar browser folder ke andar ho
+        $path = public_path('browser/index.html');
     }
     
-    if (file_exists($path2)) {
-        return response()->file($path2);
+    if (file_exists($path)) {
+        return response()->file($path);
     }
 
-    // Agar kahin nahi mili, toh screen par paths dikha do taaki error pakad mein aaye
-    return response("Debug Info: <br> Tried path 1: " . $path1 . "<br> Tried path 2: " . $path2 . "<br> Public path root: " . public_path(), 404);
+    return response('Main index.html not found in public directory!', 404);
 })->where('any', '.*');
