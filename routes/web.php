@@ -1,17 +1,22 @@
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\File;
 
-Route::get('/{any?}', function () {
-    // Check karo ki main index.html kahan rakhi hai
-    $path = public_path('index.html');
+Route::get('/{any?}', function ($any = null) {
+    // Agar koi path nahi diya toh default 'home' folder lenge
+    $slug = empty($any) ? 'home' : trim($any, '/');
     
-    if (!file_exists($path)) {
-        // Agar browser folder ke andar ho
-        $path = public_path('browser/index.html');
+    // Path banayenge jaise public/home/index.html ya public/login/index.html
+    $path = public_path($slug . '/index.html');
+    
+    if (File::exists($path)) {
+        return File::get($path);
     }
     
-    if (file_exists($path)) {
-        return response()->file($path);
+    // Agar exact match na mile toh home page dikha do
+    $fallback = public_path('home/index.html');
+    if (File::exists($fallback)) {
+        return File::get($fallback);
     }
 
-    return response('Main index.html not found in public directory!', 404);
+    return response('Page not found!', 404);
 })->where('any', '.*');
